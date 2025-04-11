@@ -50,6 +50,7 @@ new sst.aws.StaticSite("Web", {
   route: {
     router,
   },
+  errorPage: "fallback.html",
   build: {
     command: "bun run build",
     output: "dist/client",
