@@ -74,7 +74,7 @@ export default function Layout(props: ParentProps) {
                 href={`/${workspaceId()}`}
                 onClick={() => setSidebarOpen(false)}
               >
-                Home
+                Chat
               </A>
             </li>
             <li>
