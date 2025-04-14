@@ -3,10 +3,26 @@ import { IconArrowRight } from "../../ui/svg/icons"
 import { createSignal, For } from "solid-js"
 import { createToolCaller } from "./components/tool"
 import { useApi } from "../components/context-api"
+import { useZero } from "../components/context-zero"
+import { useWorkspace } from "../components/context-workspace"
+import { useQuery } from "@rocicorp/zero/solid"
 import style from "./index.module.css"
 
 export default function Index() {
   const api = useApi()
+  const zero = useZero()
+  const workspace = useWorkspace()
+  const [awsAccounts] = useQuery(() => {
+    return zero.query.aws_account.where("workspace_id", workspace.id)
+  })
+
+  // Function to check if there are any active AWS integrations
+  const hasActiveIntegrations = () => {
+    const accounts = awsAccounts()
+    if (!accounts || accounts.length === 1) return false
+    return accounts.some((account) => !account.time_deleted)
+  }
+
   const toolCaller = createToolCaller({
     tool: {
       async list() {
@@ -41,7 +57,7 @@ export default function Index() {
         })
         .then((r) => r.json() as any)
     },
-    onPromptUpdated: () => { },
+    onPromptUpdated: () => {},
   })
 
   return (
@@ -79,45 +95,50 @@ export default function Index() {
                         <div data-slot="content">
                           {JSON.stringify(item.content[0].result)}
                         </div>
-                      </div >
+                      </div>
                     )
                   })()}
               </>
             )
           }}
-        </For >
-        {
-          toolCaller.state.type === "loading" && (
-            <div data-component="loading">
-              <span>■</span>
-              <span>■</span>
-              <span>■</span>
-            </div>
-          )
-        }
-        {
-          toolCaller.prompt.filter((item) => item.role !== "system").length >
+        </For>
+        {toolCaller.state.type === "loading" && (
+          <div data-component="loading">
+            <span>■</span>
+            <span>■</span>
+            <span>■</span>
+          </div>
+        )}
+        {toolCaller.prompt.filter((item) => item.role !== "system").length >
           0 && (
-            <div data-component="clear">
-              <Button size="sm" color="ghost" onClick={toolCaller.clear}>
-                Clear chat
-              </Button>
-            </div>
-          )
-        }
-      </div >
+          <div data-component="clear">
+            <Button size="sm" color="ghost" onClick={toolCaller.clear}>
+              Clear chat
+            </Button>
+          </div>
+        )}
+      </div>
 
       <div data-slot="footer" data-max-width>
         <div data-component="chat">
           <textarea
             autofocus
             placeholder="How can I help?"
-            onKeyDown={(e) => {
+            onKeyDown={async (e) => {
               const value = e.currentTarget.value.trim()
               if (e.key === "Enter" && value) {
                 e.preventDefault()
-                toolCaller.chat(value)
                 e.currentTarget.value = ""
+
+                // Handle no integrations
+                if (!hasActiveIntegrations()) {
+                  toolCaller.addCustomMessage(
+                    value,
+                    "I need access to your AWS account first. Please go to Integrations, connect your AWS account, and then I can help you.",
+                  )
+                } else {
+                  toolCaller.chat(value)
+                }
               }
             }}
             onInput={(e) => {
@@ -136,6 +157,6 @@ export default function Index() {
           <Button disabled color="ghost" icon={<IconArrowRight />} />
         </div>
       </div>
-    </div >
+    </div>
   )
 }

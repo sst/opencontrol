@@ -206,5 +206,46 @@ export function createToolCaller<T extends ToolCallerProps>(props: T) {
     async cancel() {
       abort.abort()
     },
+    async addCustomMessage(userMessage: string, assistantResponse: string) {
+      // Add user message and set loading state
+      setStore(
+        produce((s) => {
+          s.prompt.push({
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: userMessage,
+              },
+            ],
+          })
+          s.state = {
+            type: "loading",
+            limited: false,
+          }
+        }),
+      )
+      props.onPromptUpdated?.(store.prompt)
+
+      // Fake delay for 500ms
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // Add assistant response and set back to idle
+      setStore(
+        produce((s) => {
+          s.prompt.push({
+            role: "assistant",
+            content: [
+              {
+                type: "text",
+                text: assistantResponse,
+              },
+            ],
+          })
+          s.state = { type: "idle" }
+        }),
+      )
+      props.onPromptUpdated?.(store.prompt)
+    },
   }
 }
