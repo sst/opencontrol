@@ -12,6 +12,10 @@ export const AwsAccountTable = pgTable(
   },
   (table) => [
     ...workspaceIndexes(table),
-    uniqueIndex("account_number").on(table.workspaceID, table.accountNumber),
+    uniqueIndex("account_number_region").on(
+      table.workspaceID,
+      table.accountNumber,
+      table.region,
+    ),
   ],
 )

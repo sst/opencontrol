@@ -1,6 +1,6 @@
 import { Button } from "../../ui/button"
 import { useApi } from "../components/context-api"
-import { createSignal } from "solid-js"
+import { createEffect, createSignal } from "solid-js"
 import { useZero } from "../components/context-zero"
 import { useWorkspace } from "../components/context-workspace"
 import { useQuery } from "@rocicorp/zero/solid"
@@ -12,8 +12,15 @@ export default function Billing() {
   const workspace = useWorkspace()
   const [isLoading, setIsLoading] = createSignal(false)
   const [billingData] = useQuery(() => {
-    return zero.query.billing.where("workspace_id", workspace.id)
+    return zero.query.billing.where("workspace_id", workspace.id).one()
   })
+
+  //  createEffect((old?: number) => {
+  //    if (old && old !== billingData()?.balance) {
+  //      // set loading to false
+  //    }
+  //    return billingData()?.balance
+  //  })
 
   const handleBuyCredits = async () => {
     try {
@@ -51,7 +58,7 @@ export default function Billing() {
             <p data-slot="amount">
               {(() => {
                 const balanceStr = (
-                  (billingData()?.[0]?.balance ?? 0) / 100000000
+                  (billingData()?.balance ?? 0) / 100000000
                 ).toFixed(2)
                 return `$${balanceStr === "-0.00" ? "0.00" : balanceStr}`
               })()}

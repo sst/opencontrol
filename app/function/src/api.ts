@@ -3,7 +3,13 @@ import { createClient } from "@openauthjs/openauth/client"
 import { Actor } from "@opencontrol/core/actor.js"
 import { Log } from "@opencontrol/core/util/log.js"
 import { Workspace } from "@opencontrol/core/workspace/index.js"
-import { Database, eq, and, sql } from "@opencontrol/core/drizzle/index.js"
+import {
+  Database,
+  eq,
+  and,
+  sql,
+  isNull,
+} from "@opencontrol/core/drizzle/index.js"
 import { Hono, MiddlewareHandler } from "hono"
 import { handle } from "hono/aws-lambda"
 import { HTTPException } from "hono/http-exception"
@@ -26,6 +32,10 @@ import { UserTable } from "@opencontrol/core/user/user.sql.js"
 import { Billing } from "@opencontrol/core/billing.js"
 import { centsToMicroCents } from "@opencontrol/core/util/price.js"
 import { BillingTable, PaymentTable } from "@opencontrol/core/billing.sql.js"
+import {
+  CloudFormationClient,
+  DeleteStackCommand,
+} from "@aws-sdk/client-cloudformation"
 
 const models = {
   "claude-3-7-sonnet-20250219": {
@@ -248,6 +258,69 @@ const app = new Hono()
     }
   })
   .post(
+    "/integration/aws/disconnect",
+    zValidator(
+      "json",
+      z.custom<{
+        awsAccountID: string
+      }>(),
+    ),
+    async (c) => {
+      const body = c.req.valid("json")
+
+      const awsAccount = await Database.use((tx) =>
+        tx
+          .select({
+            region: AwsAccountTable.region,
+            accountNumber: AwsAccountTable.accountNumber,
+          })
+          .from(AwsAccountTable)
+          .where(
+            and(
+              eq(AwsAccountTable.workspaceID, Actor.workspace()),
+              eq(AwsAccountTable.id, body.awsAccountID),
+              isNull(AwsAccountTable.timeDeleted),
+            ),
+          )
+          .then((rows) => rows[0]),
+      )
+      if (!awsAccount) return c.json({ message: "ok" })
+
+      // Delete CloudFormation stack
+      // note: if stack does not exist, DeleteStackCommand does NOT throw an error
+      const credentials = await Aws.assumeRole({
+        accountNumber: awsAccount.accountNumber,
+        region: awsAccount.region,
+      })
+      const cfn = new CloudFormationClient({
+        credentials,
+        region: awsAccount.region,
+      })
+      await cfn.send(
+        new DeleteStackCommand({
+          StackName: `OpenControl-${Actor.workspace().replace(/_/g, "-")}`,
+        }),
+      )
+
+      await Database.use((tx) =>
+        tx
+          .update(AwsAccountTable)
+          .set({
+            timeDeleted: new Date(),
+          })
+          .where(
+            and(
+              eq(AwsAccountTable.workspaceID, Actor.workspace()),
+              eq(AwsAccountTable.id, body.awsAccountID),
+              eq(AwsAccountTable.region, awsAccount.region),
+            ),
+          ),
+      )
+
+      return c.json({ message: "ok" })
+    },
+  )
+  .post(
     "/aws/connect",
     zValidator(
       "json",
@@ -290,12 +363,47 @@ const app = new Hono()
               target: [
                 AwsAccountTable.workspaceID,
                 AwsAccountTable.accountNumber,
+                AwsAccountTable.region,
               ],
               set: {
                 region,
                 timeDeleted: null,
               },
             }),
+        )
+
+        return c.json({ message: "ok" })
+      })
+    },
+  )
+  .post(
+    "/aws/disconnect",
+    zValidator(
+      "json",
+      z.custom<{
+        workspaceID: string
+        region: string
+        role: string
+      }>(),
+    ),
+    async (c) => {
+      const { workspaceID, region, role } = c.req.valid("json")
+      return Actor.provide("system", { workspaceID }, async () => {
+        const accountNumber = role.split(":")[4]
+
+        await Database.use((tx) =>
+          tx
+            .update(AwsAccountTable)
+            .set({
+              timeDeleted: new Date(),
+            })
+            .where(
+              and(
+                eq(AwsAccountTable.workspaceID, workspaceID),
+                eq(AwsAccountTable.accountNumber, accountNumber),
+                eq(AwsAccountTable.region, region),
+              ),
+            ),
         )
 
         return c.json({
@@ -322,7 +430,12 @@ const app = new Hono()
               tx
                 .select({})
                 .from(AwsAccountTable)
-                .where(eq(AwsAccountTable.workspaceID, Actor.workspace())),
+                .where(
+                  and(
+                    eq(AwsAccountTable.workspaceID, Actor.workspace()),
+                    isNull(AwsAccountTable.timeDeleted),
+                  ),
+                ),
             ).then((rows) =>
               rows.map((item): ListToolsResult["tools"][number] => ({
                 name: "aws",
@@ -366,7 +479,12 @@ const app = new Hono()
                     region: AwsAccountTable.region,
                   })
                   .from(AwsAccountTable)
-                  .where(eq(AwsAccountTable.workspaceID, Actor.workspace())),
+                  .where(
+                    and(
+                      eq(AwsAccountTable.workspaceID, Actor.workspace()),
+                      isNull(AwsAccountTable.timeDeleted),
+                    ),
+                  ),
               )
               if (!awsAccount) {
                 throw new Error(
@@ -389,13 +507,7 @@ const app = new Hono()
                   `service "${service}" is not found in aws sdk v2`,
                 )
               }
-              const instance = new client({
-                credentials: {
-                  accessKeyId: credentials.AccessKeyId,
-                  secretAccessKey: credentials.SecretAccessKey,
-                  sessionToken: credentials.SessionToken,
-                },
-              })
+              const instance = new client({ credentials })
               if (!instance[method]) {
                 throw new Error(
                   `method "${method}" is not found in on the ${service} service of aws sdk v2`,

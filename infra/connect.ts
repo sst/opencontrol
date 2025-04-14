@@ -81,7 +81,26 @@ exports.handler = async (event) => {
 
   if (event.RequestType === "Create") {
     try {
-      await fetch(process.env.API_ENDPOINT, {
+      await fetch(process.env.API_ENDPOINT + "/aws/connect", {
+        method: "POST",
+        body: JSON.stringify({
+          workspaceID: event.ResourceProperties.workspaceID,
+          region: event.ResourceProperties.region,
+          role: event.ResourceProperties.role,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } catch(e) {
+      console.error(e);
+      status = "FAILED";
+    }
+  }
+
+  if (event.RequestType === "Delete") {
+    try {
+      await fetch(process.env.API_ENDPOINT + "/aws/disconnect", {
         method: "POST",
         body: JSON.stringify({
           workspaceID: event.ResourceProperties.workspaceID,
@@ -114,7 +133,7 @@ exports.handler = async (event) => {
         },
         Environment: {
           Variables: {
-            API_ENDPOINT: `https://api-${domain}/aws/connect`,
+            API_ENDPOINT: `https://api-${domain}`,
           },
         },
         Handler: "index.handler",

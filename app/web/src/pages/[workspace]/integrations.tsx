@@ -3,22 +3,34 @@ import { useZero } from "../components/context-zero"
 import { useAccount } from "../../components/context-account"
 import { useWorkspace } from "../components/context-workspace"
 import { Button } from "../../ui/button"
-import { For } from "solid-js"
+import { createSignal, For } from "solid-js"
 import style from "./integrations.module.css"
+import { useApi } from "../components/context-api"
 
 export default function Integrations() {
+  const api = useApi()
   const account = useAccount()
   const workspace = useWorkspace()
   const zero = useZero()
+  const [isDisconnecting, setIsDisconnecting] = createSignal(false)
   const [awsAccounts] = useQuery(() => {
     return zero.query.aws_account.where("workspace_id", workspace.id)
   })
 
   const handleRemoveAccount = async (id: string) => {
-    console.log(`Removing account ${id}`)
-    // In a real implementation, this would call a mutation to set time_deleted
-    // For now, just log the action
-    // await zero.mutate.aws_account.update(workspace.id, id, { time_deleted: Date.now() })
+    try {
+      setIsDisconnecting(true)
+      const response = await api.integration.aws.disconnect
+        .$post({
+          json: {
+            awsAccountID: id,
+          },
+        })
+        .then((r) => r.json() as any)
+    } catch (error) {
+      console.error("Failed to disconnect AWS account:", error)
+      setIsDisconnecting(false)
+    }
   }
 
   const handleConnectAWS = () => {
@@ -64,9 +76,10 @@ export default function Integrations() {
                     <Button
                       color="ghost"
                       size="sm"
+                      disabled={isDisconnecting()}
                       onClick={() => handleRemoveAccount(account.id)}
                     >
-                      Remove
+                      {isDisconnecting() ? "Removing..." : "Remove"}
                     </Button>
                   </div>
                 )}

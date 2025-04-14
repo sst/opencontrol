@@ -6,6 +6,7 @@
   "type": "module",
   "dependencies": {
     "@ai-sdk/anthropic": "1.2.1",
+    "@aws-sdk/client-cloudformation": "3.787.0",
     "@hono/zod-validator": "0.4.3",
     "@modelcontextprotocol/sdk": "1.9.0",
     "@openauthjs/openauth": "0.0.0-20250322224806",

@@ -23,7 +23,11 @@ export namespace Aws {
       )
       if (!result.Credentials) throw new Error("Failed to assume role")
 
-      return result.Credentials
+      return {
+        accessKeyId: result.Credentials.AccessKeyId!,
+        secretAccessKey: result.Credentials.SecretAccessKey!,
+        sessionToken: result.Credentials.SessionToken!,
+      }
     },
   )
 }

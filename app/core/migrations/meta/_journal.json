@@ -64,6 +64,13 @@
       "when": 1744406131671,
       "tag": "0008_parched_vanisher",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1744653579860,
+      "tag": "0009_spooky_grim_reaper",
+      "breakpoints": true
     }
   ]
 }
