@@ -572,7 +572,7 @@ const app = new Hono()
     const body = Billing.stripe.webhooks.constructEvent(
       await c.req.text(),
       c.req.header("stripe-signature")!,
-      Resource.StripeWebhookSecret.value,
+      process.env.STRIPE_WEBHOOK_SECRET!,
     )
 
     console.log(body.type, JSON.stringify(body, null, 2))

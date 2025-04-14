@@ -1,13 +1,16 @@
 import { templateUrl } from "./connect"
 import { postgres } from "./postgres"
 import { auth, router, vpc } from "./shared"
-import { domain, subdomain } from "./stage"
+import { subdomain } from "./stage"
 import { zero } from "./zero"
+import { WebhookEndpoint } from "pulumi-stripe"
 
 export const secret = {
   AnthropicApiKey: new sst.Secret("AnthropicApiKey"),
-  StripeSecretKey: new sst.Secret("StripeSecretKey"),
-  StripeWebhookSecret: new sst.Secret("StripeWebhookSecret"),
+  StripeSecretKey: new sst.Secret(
+    "StripeSecretKey",
+    process.env.STRIPE_SECRET_KEY!,
+  ),
 }
 const AllSecrets = Object.values(secret)
 
@@ -63,4 +66,38 @@ new sst.aws.StaticSite("Web", {
     VITE_TEMPLATE_URL: templateUrl,
   },
   path: "app/web",
+})
+
+const stripeWebhook = new WebhookEndpoint("StripeWebhook", {
+  url: $interpolate`${api.url}/stripe/webhook`,
+  enabledEvents: [
+    "checkout.session.async_payment_failed",
+    "checkout.session.async_payment_succeeded",
+    "checkout.session.completed",
+    "checkout.session.expired",
+    "customer.created",
+    "customer.deleted",
+    "customer.updated",
+    "customer.discount.created",
+    "customer.discount.deleted",
+    "customer.discount.updated",
+    "customer.source.created",
+    "customer.source.deleted",
+    "customer.source.expiring",
+    "customer.source.updated",
+    "customer.subscription.created",
+    "customer.subscription.deleted",
+    "customer.subscription.paused",
+    "customer.subscription.pending_update_applied",
+    "customer.subscription.pending_update_expired",
+    "customer.subscription.resumed",
+    "customer.subscription.trial_will_end",
+    "customer.subscription.updated",
+    "customer.tax_id.created",
+    "customer.tax_id.deleted",
+    "customer.tax_id.updated",
+  ],
+})
+api.addEnvironment({
+  STRIPE_WEBHOOK_SECRET: stripeWebhook.secret,
 })

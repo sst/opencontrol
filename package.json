@@ -45,5 +45,8 @@
     "@rocicorp/zero-sqlite3",
     "esbuild",
     "protobufjs"
-  ]
+  ],
+  "dependencies": {
+    "pulumi-stripe": "0.0.24"
+  }
 }

@@ -12,6 +12,9 @@ export default $config({
           region: "us-east-1",
           profile: input.stage === "production" ? "sst-production" : "sst-dev",
         },
+        stripe: {
+          apiKey: process.env.STRIPE_SECRET_KEY,
+        },
         planetscale: "0.2.2",
         command: "1.0.2",
         random: "4.17.0",
