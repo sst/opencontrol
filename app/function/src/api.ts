@@ -129,46 +129,58 @@ const app = new Hono()
       workspaces,
     })
   })
-  .post("/billing/checkout", async (c) => {
-    const account = Actor.assert("user")
+  .post(
+    "/billing/checkout",
+    zValidator(
+      "json",
+      z.custom<{
+        success_url: string
+        cancel_url: string
+      }>(),
+    ),
+    async (c) => {
+      const account = Actor.assert("user")
 
-    const body = await c.req.json()
+      const body = await c.req.json()
 
-    const customer = await Billing.get()
-    const session = await Billing.stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: "OpenControl credits",
+      const customer = await Billing.get()
+      const session = await Billing.stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: "OpenControl credits",
+              },
+              unit_amount: 2000, // $20 minimum
             },
-            unit_amount: 2000, // $20 minimum
+            quantity: 1,
           },
-          quantity: 1,
+        ],
+        payment_intent_data: {
+          setup_future_usage: "on_session",
         },
-      ],
-      payment_intent_data: {
-        setup_future_usage: "on_session",
-      },
-      ...(customer.customerID
-        ? { customer: customer.customerID }
-        : { customer_email: account.properties.email }),
-      customer_creation: "always",
-      metadata: {
-        workspaceID: Actor.workspace(),
-      },
-      currency: "usd",
-      payment_method_types: ["card"],
-      success_url: body.return_url,
-      cancel_url: body.return_url,
-    })
+        ...(customer.customerID
+          ? { customer: customer.customerID }
+          : {
+              customer_email: account.properties.email,
+              customer_creation: "always",
+            }),
+        metadata: {
+          workspaceID: Actor.workspace(),
+        },
+        currency: "usd",
+        payment_method_types: ["card"],
+        success_url: body.success_url,
+        cancel_url: body.cancel_url,
+      })
 
-    return c.json({
-      url: session.url,
-    })
-  })
+      return c.json({
+        url: session.url,
+      })
+    },
+  )
   .post("/billing/portal", async (c) => {
     const body = await c.req.json()
 

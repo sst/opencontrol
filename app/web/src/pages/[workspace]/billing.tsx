@@ -3,8 +3,8 @@ import { useApi } from "../components/context-api"
 import { createEffect, createSignal } from "solid-js"
 import { useZero } from "../components/context-zero"
 import { useWorkspace } from "../components/context-workspace"
-import { useQuery } from "@rocicorp/zero/solid"
 import style from "./billing.module.css"
+import { useQuery } from "@rocicorp/zero/solid"
 
 export default function Billing() {
   const api = useApi()
@@ -15,27 +15,46 @@ export default function Billing() {
     return zero.query.billing.where("workspace_id", workspace.id).one()
   })
 
-  //  createEffect((old?: number) => {
-  //    if (old && old !== billingData()?.balance) {
-  //      // set loading to false
-  //    }
-  //    return billingData()?.balance
-  //  })
+  // Run once on component mount to check URL parameters
+  ;(() => {
+    const url = new URL(window.location.href)
+    const result = url.hash
+
+    console.log("STRIPE RESULT", result)
+
+    if (url.hash === "#success") {
+      setIsLoading(true)
+      // Remove the hash from the URL
+      window.history.replaceState(null, "", window.location.pathname + window.location.search)
+    }
+  })()
+
+  createEffect((old?: number) => {
+    console.log("BILLING DATA", old)
+    if (old && old !== billingData()?.balance) {
+      setIsLoading(false)
+    }
+    return billingData()?.balance
+  })
 
   const handleBuyCredits = async () => {
     try {
       setIsLoading(true)
+      const baseUrl = window.location.href
+      const successUrl = new URL(baseUrl)
+      successUrl.hash = "success"
+
       const response = await api.billing.checkout
         .$post({
           json: {
-            return_url: window.location.href,
+            success_url: successUrl.toString(),
+            cancel_url: baseUrl,
           },
         })
         .then((r) => r.json() as any)
       window.location.href = response.url
     } catch (error) {
       console.error("Failed to get checkout URL:", error)
-    } finally {
       setIsLoading(false)
     }
   }
