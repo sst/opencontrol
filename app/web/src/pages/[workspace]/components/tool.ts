@@ -39,15 +39,16 @@ const system = [
   },
 ]
 
+const [store, setStore] = createStore<{
+  prompt: LanguageModelV1Prompt
+  state: { type: "idle" } | { type: "loading"; limited?: boolean }
+}>({
+  prompt: [...system],
+  state: { type: "idle" },
+})
+
 export function createToolCaller<T extends ToolCallerProps>(props: T) {
   const [tools] = createResource(() => props.tool.list())
-  const [store, setStore] = createStore<{
-    prompt: LanguageModelV1Prompt
-    state: { type: "idle" } | { type: "loading"; limited?: boolean }
-  }>({
-    prompt: [...system],
-    state: { type: "idle" },
-  })
 
   let abort: AbortController
 
