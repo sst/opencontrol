@@ -105,7 +105,7 @@
       "name": "opencontrol",
       "version": "0.1.0",
       "bin": {
-        "opencontrol": "./bin/index.mjs",
+        "opencontrol": "./bin/index.mjs"
       },
       "dependencies": {
         "@hono/zod-validator": "0.4.3",
@@ -132,7 +132,7 @@
         "astro-sst": "3.1.2",
         "rehype-autolink-headings": "^7.1.0",
         "sharp": "^0.33.4",
-        "toolbeam-docs-theme": "0.1.1",
+        "toolbeam-docs-theme": "^0.1.1",
       },
       "devDependencies": {
         "typedoc": "^0.27.5",

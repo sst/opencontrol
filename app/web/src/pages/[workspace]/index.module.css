@@ -149,19 +149,6 @@
     }
   }
 
-  @keyframes loading-dots {
-
-    0%,
-    100% {
-      opacity: 0;
-    }
-
-    40%,
-    60% {
-      opacity: 1;
-    }
-  }
-
   [data-component="clear"] {
     position: relative;
     padding: var(--space-4) var(--space-4);
@@ -236,5 +223,17 @@
     & [data-component="button"] {
       height: 100%;
     }
+  }
+}
+
+@keyframes loading-dots {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  40%,
+  60% {
+    opacity: 1;
   }
 }

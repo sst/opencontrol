@@ -1,16 +1,11 @@
 import { Button } from "../../ui/button"
 import { IconArrowRight } from "../../ui/svg/icons"
-import { useAccount } from "../../components/context-account"
-import { createSignal, For, onMount } from "solid-js"
+import { createSignal, For } from "solid-js"
 import { createToolCaller } from "./components/tool"
 import { useApi } from "../components/context-api"
 import style from "./index.module.css"
-import Layout from "./components/layout"
-import { useOpenAuth } from "../../components/context-openauth"
 
 export default function Index() {
-  const auth = useOpenAuth()
-  const account = useAccount()
   const api = useApi()
   const toolCaller = createToolCaller({
     tool: {
