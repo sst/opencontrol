@@ -23,6 +23,7 @@ interface ToolCallerProps {
   ) => Promise<
     | { err: "rate" }
     | { err: "context" }
+    | { err: "balance" }
     | ({ err: false } & Awaited<ReturnType<LanguageModelV1["doGenerate"]>>)
   >
   onPromptUpdated?: (prompt: LanguageModelV1Prompt) => void
@@ -200,6 +201,25 @@ export function createToolCaller<T extends ToolCallerProps>(props: T) {
           })
           await new Promise((resolve) => setTimeout(resolve, 1000))
         }
+
+        if (response.err === "balance") {
+          setStore(
+            produce((s) => {
+              s.prompt.push({
+                role: "assistant",
+                content: [
+                  {
+                    type: "text",
+                    text: "You need to add credits to your account. Please go to Billing and add credits to continue.",
+                  },
+                ],
+              })
+              s.state = { type: "idle" }
+            }),
+          )
+          props.onPromptUpdated?.(store.prompt)
+          break
+        }
       }
       setStore("state", { type: "idle" })
     },
@@ -228,7 +248,7 @@ export function createToolCaller<T extends ToolCallerProps>(props: T) {
       props.onPromptUpdated?.(store.prompt)
 
       // Fake delay for 500ms
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
       // Add assistant response and set back to idle
       setStore(

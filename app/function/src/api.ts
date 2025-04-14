@@ -191,20 +191,29 @@ const app = new Hono()
 
     // Check balance
     const customer = await Billing.get()
+    if (customer.balance <= 0) {
+      return c.json(
+        {
+          err: "balance",
+          message: "Insufficient balance",
+        },
+        500,
+      )
+    }
+
     try {
       const result = await model.doGenerate(body)
 
+      // Update usage
       const modelId = result.response?.modelId
       if (modelId !== "claude-3-7-sonnet-20250219")
         throw new Error("Unsupported model")
-
       const inputTokens = result.usage.promptTokens
       const outputTokens = result.usage.completionTokens
       const cost =
         (inputTokens * models[modelId].cost.input +
           outputTokens * models[modelId].cost.output) *
         100
-
       const newBalance = await Billing.consume({
         requestID: result.response?.id,
         model: modelId,
@@ -213,6 +222,7 @@ const app = new Hono()
         costInCents: cost,
       })
 
+      // Reload balance
       if (customer.customerID && newBalance < centsToMicroCents(500)) {
         const amount = 2000 // $20
         const ret = await Billing.stripe.paymentIntents.create({

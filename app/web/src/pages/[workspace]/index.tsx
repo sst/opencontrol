@@ -19,7 +19,7 @@ export default function Index() {
   // Function to check if there are any active AWS integrations
   const hasActiveIntegrations = () => {
     const accounts = awsAccounts()
-    if (!accounts || accounts.length === 1) return false
+    if (!accounts || accounts.length === 0) return false
     return accounts.some((account) => !account.time_deleted)
   }
 
@@ -130,7 +130,7 @@ export default function Index() {
                 e.preventDefault()
                 e.currentTarget.value = ""
 
-                // Handle no integrations
+                // Check has integrations
                 if (!hasActiveIntegrations()) {
                   toolCaller.addCustomMessage(
                     value,
