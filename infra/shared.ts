@@ -14,7 +14,7 @@ export const router = isPermanentStage
 
 export const vpc =
   $app.stage === "production"
-    ? sst.aws.Vpc.get("Vpc", "")
+    ? sst.aws.Vpc.get("Vpc", "vpc-0f06c4b635a760100")
     : sst.aws.Vpc.get("Vpc", "vpc-069d2d529d3288945")
 
 export const auth = new sst.Linkable("Auth", {
