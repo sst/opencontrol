@@ -133,7 +133,7 @@ exports.handler = async (event) => {
         },
         Environment: {
           Variables: {
-            API_ENDPOINT: `https://api-${domain}`,
+            API_ENDPOINT: api.url,
           },
         },
         Handler: "index.handler",
