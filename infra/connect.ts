@@ -1,7 +1,6 @@
 import { createHash } from "crypto"
 import { storagePublic } from "./shared"
-import { api } from "./app"
-import { domain } from "./stage"
+import { subdomain } from "./stage"
 
 export const identity = aws.getCallerIdentityOutput()
 
@@ -133,7 +132,7 @@ exports.handler = async (event) => {
         },
         Environment: {
           Variables: {
-            API_ENDPOINT: api.url,
+            API_ENDPOINT: `https://${subdomain("api")}`,
           },
         },
         Handler: "index.handler",
