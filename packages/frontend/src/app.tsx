@@ -15,10 +15,10 @@ const providerMetadata = {
 }
 const systemPrompt = {
   get: () => {
-    return localStorage.getItem("systemPrompt") ?? SYSTEM_PROMPT
+    return localStorage.getItem("opencontrol:systemPrompt") ?? SYSTEM_PROMPT
   },
   set: (value: string) => {
-    localStorage.setItem("systemPrompt", value)
+    localStorage.setItem("opencontrol:systemPrompt", value)
   },
 }
 // Define initial system messages once
@@ -223,13 +223,15 @@ export function App() {
   }
 
   const [showSystemPromptModal, setShowSystemPromptModal] = createSignal(false)
-  const [systemPromptValue, setSystemPromptValue] = createSignal(systemPrompt.get())
-  
+  const [systemPromptValue, setSystemPromptValue] = createSignal(
+    systemPrompt.get(),
+  )
+
   const modifySystemPrompt = () => {
     setSystemPromptValue(systemPrompt.get())
     setShowSystemPromptModal(true)
   }
-  
+
   const handleSystemPromptSubmit = () => {
     const newPrompt = systemPromptValue()
     if (newPrompt.trim() !== "") {
@@ -238,7 +240,7 @@ export function App() {
     }
     setShowSystemPromptModal(false)
   }
-  
+
   createEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (showSystemPromptModal()) {
@@ -251,7 +253,7 @@ export function App() {
         }
       }
     }
-    
+
     window.addEventListener("keydown", handleKeyDown)
     onCleanup(() => {
       window.removeEventListener("keydown", handleKeyDown)
@@ -369,7 +371,10 @@ export function App() {
 
       {/* System Prompt Modal */}
       <Show when={showSystemPromptModal()}>
-        <div data-component="dialog-overlay" onClick={() => setShowSystemPromptModal(false)}></div>
+        <div
+          data-component="dialog-overlay"
+          onClick={() => setShowSystemPromptModal(false)}
+        ></div>
         <div data-component="dialog-center">
           <div data-slot="content" data-size="md">
             <div data-slot="header">
@@ -386,13 +391,19 @@ export function App() {
               />
             </div>
             <div data-slot="footer">
-              <small style={{ "margin-right": "auto", "opacity": "0.7" }}>
+              <small style={{ "margin-right": "auto", opacity: "0.7" }}>
                 Press Esc to cancel, Ctrl+Enter to save
               </small>
-              <button data-component="footer-action" onClick={() => setShowSystemPromptModal(false)}>
+              <button
+                data-component="footer-action"
+                onClick={() => setShowSystemPromptModal(false)}
+              >
                 Cancel
               </button>
-              <button data-component="footer-action" onClick={handleSystemPromptSubmit}>
+              <button
+                data-component="footer-action"
+                onClick={handleSystemPromptSubmit}
+              >
                 Save
               </button>
             </div>
