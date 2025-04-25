@@ -379,7 +379,7 @@ export function App() {
           <div data-slot="content" data-size="md">
             <div data-slot="header">
               <label data-size="md" data-slot="title" data-component="label">
-                ⚠️ System Prompt (will reset chat history)
+                🔧 System Prompt
               </label>
             </div>
             <div data-slot="main">
@@ -391,7 +391,7 @@ export function App() {
               />
             </div>
             <div data-slot="footer">
-              <small style={{ "margin-right": "auto", opacity: "0.7" }}>
+              <small data-component="footer-hint">
                 Press Esc to cancel, Ctrl+Enter to save
               </small>
               <button

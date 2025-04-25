@@ -380,5 +380,12 @@ body {
       gap: 10px;
       border-top: 1px solid var(--color-bravo100);
   }
+  
+  [data-component="footer-hint"] {
+      margin-right: auto;
+      opacity: 0.7;
+      display: flex;
+      align-items: center;
+  }
 }
 
