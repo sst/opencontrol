@@ -13,12 +13,19 @@ const providerMetadata = {
     },
   },
 }
-
+const systemPrompt = {
+  get: () => {
+    return localStorage.getItem("systemPrompt") ?? SYSTEM_PROMPT
+  },
+  set: (value: string) => {
+    localStorage.setItem("systemPrompt", value)
+  },
+}
 // Define initial system messages once
 const getInitialPrompt = (): LanguageModelV1Prompt => [
   {
     role: "system",
-    content: SYSTEM_PROMPT,
+    content: systemPrompt.get(),
     providerMetadata: {
       anthropic: {
         cacheControl: {
@@ -215,6 +222,17 @@ export function App() {
     textarea?.focus()
   }
 
+  const modifySystemPrompt = () => {
+    const newPrompt = prompt(
+      "⚠️ This is going to reset chat history.\nEnter new system prompt:",
+      systemPrompt.get(),
+    )
+    if (newPrompt !== null) {
+      systemPrompt.set(newPrompt)
+      setStore("prompt", getInitialPrompt())
+    }
+  }
+
   return (
     <div data-component="root" ref={root}>
       <div data-component="messages">
@@ -292,13 +310,16 @@ export function App() {
         <div data-slot="spacer"></div>
       </div>
       <div data-component="footer">
-        {store.prompt.length > 2 && !store.isProcessing && (
-          <div data-slot="clear">
-            <button data-component="clear-button" onClick={clearConversation}>
+        <div data-slot="footer-actions">
+          <button data-component="footer-action" onClick={modifySystemPrompt}>
+            🔧
+          </button>
+          {store.prompt.length > 2 && !store.isProcessing && (
+            <button data-component="footer-action" onClick={clearConversation}>
               Clear
             </button>
-          </div>
-        )}
+          )}
+        </div>
         <div data-slot="chat">
           <textarea
             autofocus
