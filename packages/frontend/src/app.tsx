@@ -369,7 +369,6 @@ export function App() {
         </div>
       </div>
 
-      {/* System Prompt Modal */}
       <Show when={showSystemPromptModal()}>
         <div
           data-component="dialog-overlay"
