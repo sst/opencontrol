@@ -89,7 +89,7 @@ OpenControl lets you control your infrastructure with AI.
 
 5. **Infrastructure**
 
-   We are using SST here, but you can since **OpenControl is just a Hono app, you can deploy it however you want**.
+   We are using SST here, but since **OpenControl is just a Hono app, you can deploy it however you want**.
 
    ```bash
    touch sst.config.ts
