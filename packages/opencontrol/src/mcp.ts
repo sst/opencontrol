@@ -5,6 +5,10 @@ import {
   InitializeResult,
   JSONRPCRequest,
   JSONRPCResponse,
+  ListResourcesRequestSchema,
+  ListResourcesResult,
+  ListResourceTemplatesRequestSchema,
+  ListResourceTemplatesResult,
   ListToolsRequestSchema,
   ListToolsResult,
 } from "@modelcontextprotocol/sdk/types.js"
@@ -16,6 +20,8 @@ const RequestSchema = z.union([
   InitializeRequestSchema,
   ListToolsRequestSchema,
   CallToolRequestSchema,
+  ListResourcesRequestSchema,
+  ListResourceTemplatesRequestSchema,
 ])
 type RequestSchema = z.infer<typeof RequestSchema>
 
@@ -36,7 +42,16 @@ export function createMcp(input: { tools: Tool[] }) {
               version: "0.0.1",
             },
           } satisfies InitializeResult
-
+        if (parsed.method === "resources/list") {
+          return {
+            resources: [],
+          } satisfies ListResourcesResult
+        }
+        if (parsed.method === "resources/templates/list") {
+          return {
+            resourceTemplates: [],
+          } satisfies ListResourceTemplatesResult
+        }
         if (parsed.method === "tools/list") {
           return {
             tools: input.tools.map((tool) => ({
