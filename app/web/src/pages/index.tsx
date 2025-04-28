@@ -25,10 +25,7 @@ export default function Index() {
 
             <section data-slot="cta">
               <div data-slot="col-1">
-                <a
-                  target="_self"
-                  href={import.meta.env.VITE_DOCS_URL}
-                >
+                <a target="_self" href={import.meta.env.VITE_DOCS_URL}>
                   Self-host
                 </a>
               </div>

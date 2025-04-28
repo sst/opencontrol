@@ -25,7 +25,11 @@ export default function Billing() {
     if (url.hash === "#success") {
       setIsLoading(true)
       // Remove the hash from the URL
-      window.history.replaceState(null, "", window.location.pathname + window.location.search)
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      )
     }
   })()
 

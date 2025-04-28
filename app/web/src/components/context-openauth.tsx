@@ -17,10 +17,7 @@ import { createStore, produce } from "solid-js/store"
 import { isServer } from "solid-js/web"
 
 interface Storage {
-  subjects: Record<
-    string,
-    SubjectInfo
-  >
+  subjects: Record<string, SubjectInfo>
   current?: string
 }
 
@@ -64,11 +61,8 @@ export function OpenAuthProvider(props: ParentProps<AuthContextOpts>) {
     },
   )
 
-
-
   const resource = createAsync(async () => {
-    if (isServer)
-      return true
+    if (isServer) return true
     const hash = new URLSearchParams(window.location.search.substring(1))
     const code = hash.get("code")
     const state = hash.get("state")
@@ -135,7 +129,6 @@ export function OpenAuthProvider(props: ParentProps<AuthContextOpts>) {
     return promise
   }
 
-
   const ctx: Context = {
     get all() {
       return storage.subjects
@@ -162,11 +155,11 @@ export function OpenAuthProvider(props: ParentProps<AuthContextOpts>) {
       id = id || storage.current
       if (!id) return
       return access(id || storage.current!)
-    }
+    },
   }
 
   createEffect(() => {
-    if (!(resource())) return
+    if (!resource()) return
     if (storage.current) return
     const [first] = Object.keys(storage.subjects)
     if (first) {
@@ -174,7 +167,6 @@ export function OpenAuthProvider(props: ParentProps<AuthContextOpts>) {
       return
     }
   })
-
 
   return (
     <>
@@ -189,5 +181,3 @@ export function useOpenAuth() {
   if (!result) throw new Error("no auth context")
   return result
 }
-
-

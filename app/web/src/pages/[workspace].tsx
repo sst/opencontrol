@@ -7,9 +7,7 @@ export default function Index(props: ParentProps) {
   return (
     <WorkspaceProvider>
       <ZeroProvider>
-        <Layout>
-          {props.children}
-        </Layout>
+        <Layout>{props.children}</Layout>
       </ZeroProvider>
     </WorkspaceProvider>
   )

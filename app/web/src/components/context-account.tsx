@@ -1,4 +1,10 @@
-import { createContext, createEffect, ParentProps, Suspense, useContext } from "solid-js"
+import {
+  createContext,
+  createEffect,
+  ParentProps,
+  Suspense,
+  useContext,
+} from "solid-js"
 import { makePersisted } from "@solid-primitives/storage"
 import { createStore } from "solid-js/store"
 import { useOpenAuth } from "./context-openauth"
@@ -43,7 +49,6 @@ function init() {
       .then((val) => setStore("accounts", id, val as any))
   }
 
-
   createEffect((previous: string[]) => {
     if (Object.keys(auth.all).length === 0) {
       return []
@@ -57,7 +62,9 @@ function init() {
 
   const result = {
     get all() {
-      return Object.keys(auth.all).map((id) => store.accounts[id]).filter(Boolean)
+      return Object.keys(auth.all)
+        .map((id) => store.accounts[id])
+        .filter(Boolean)
     },
     get current() {
       if (!auth.subject) return undefined
@@ -65,9 +72,7 @@ function init() {
     },
     refresh,
     get ready() {
-      return (
-        Object.keys(auth.all).length === result.all.length
-      )
+      return Object.keys(auth.all).length === result.all.length
     },
   }
 
@@ -77,7 +82,7 @@ function init() {
 export function AccountProvider(props: ParentProps) {
   const ctx = init()
   const resource = createAsync(async () => {
-    await new Promise<void>(resolve => {
+    await new Promise<void>((resolve) => {
       if (isServer) return resolve()
       createEffect(() => {
         if (ctx.ready) resolve()
@@ -85,12 +90,13 @@ export function AccountProvider(props: ParentProps) {
     })
     return null
   })
-  return <Suspense>
-    {resource()}
-    <context.Provider value={ctx}>{props.children}</context.Provider>
-  </Suspense>
+  return (
+    <Suspense>
+      {resource()}
+      <context.Provider value={ctx}>{props.children}</context.Provider>
+    </Suspense>
+  )
 }
-
 
 export function useAccount() {
   const result = useContext(context)
