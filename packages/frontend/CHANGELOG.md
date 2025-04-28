@@ -1,5 +1,13 @@
 # opencontrol-frontend
 
+## 0.0.6
+
+### Patch Changes
+
+- bd50eba: Adds OPENCONTROL_DISABLE_AUTH
+- Updated dependencies [bd50eba]
+  - opencontrol@0.1.1
+
 ## 0.0.5
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # opencontrol
 
+## 0.1.1
+
+### Patch Changes
+
+- bd50eba: Adds OPENCONTROL_DISABLE_AUTH
+
 ## 0.1.0
 
 ### Minor Changes
