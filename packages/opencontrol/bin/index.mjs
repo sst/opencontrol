@@ -9,18 +9,25 @@ const server = new Server({
 
 const url = process.argv[2]
 const key = process.argv[3]
+const disableAuth = process.env.OPENCONTROL_DISABLE_AUTH === "true"
 
 class ProxyTransport {
   #stdio = new StdioServerTransport()
   async start() {
     this.#stdio.onmessage = (message) => {
       if ("id" in message) {
+        const headers = {
+          "Content-Type": "application/json",
+        }
+
+        // Only add authorization header if auth is not disabled and key is provided
+        if (!disableAuth && key) {
+          headers.authorization = `Bearer ${key}`
+        }
+
         fetch(url + "/mcp", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: `Bearer ${key}`,
-          },
+          headers,
           body: JSON.stringify(message),
         }).then(async (response) => this.send(await response.json()))
         return
