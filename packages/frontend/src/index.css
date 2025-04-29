@@ -196,13 +196,14 @@ body {
   padding: 0 16px 16px;
   box-sizing: border-box;
 
-  [data-slot="clear"] {
+  [data-slot="footer-actions"] {
     position: relative;
     width: 100%;
     max-width: 780px;
     display: flex;
     justify-content: flex-end;
     margin-bottom: 8px;
+    gap: 8px;
   }
 
   [data-slot="chat"] {
@@ -222,7 +223,7 @@ body {
   }
 }
 
-[data-component="clear-button"] {
+[data-component="footer-action"] {
   background: var(--color-bravo200);
   color: white;
   border: none;
@@ -246,8 +247,8 @@ body {
 @media (max-width: 600px) {
   [data-component="footer"] {
     padding-bottom: 8px;
-    
-    [data-slot="clear"] {
+
+    [data-slot="footer-actions"] {
       margin-bottom: 4px;
     }
     
@@ -256,8 +257,8 @@ body {
       border-radius: 8px;
     }
   }
-  
-  [data-component="clear-button"] {
+
+  [data-component="footer-action"] {
     padding: 4px 10px;
     font-size: 12px;
   }
@@ -330,3 +331,61 @@ body {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(-720deg); }
 }
+
+/* Dialog Components */
+[data-component="dialog-overlay"] {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  backdrop-filter: blur(2px);
+}
+
+[data-component="dialog-center"] {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+
+  [data-slot="content"] {
+      background: var(--color-alpha200);
+      border-radius: 8px;
+      width: 90%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--color-bravo200);
+  }
+      
+  [data-slot="content"] [data-slot="header"] {
+      padding: 16px;
+      border-bottom: 1px solid var(--color-bravo100);
+  }
+      
+  [data-slot="content"] [data-slot="main"] {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+  }
+      
+  [data-slot="content"] [data-slot="footer"] {
+      padding: 16px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      border-top: 1px solid var(--color-bravo100);
+  }
+  
+  [data-component="footer-hint"] {
+      margin-right: auto;
+      opacity: 0.7;
+      display: flex;
+      align-items: center;
+  }
+}
+

@@ -1,5 +1,5 @@
 import { LanguageModelV1Prompt } from "ai"
-import { createEffect, For, onCleanup } from "solid-js"
+import { createEffect, For, onCleanup, Show, createSignal } from "solid-js"
 import { createStore } from "solid-js/store"
 import SYSTEM_PROMPT from "./system.txt?raw"
 import { hc } from "hono/client"
@@ -13,12 +13,19 @@ const providerMetadata = {
     },
   },
 }
-
+const systemPrompt = {
+  get: () => {
+    return localStorage.getItem("opencontrol:systemPrompt") ?? SYSTEM_PROMPT
+  },
+  set: (value: string) => {
+    localStorage.setItem("opencontrol:systemPrompt", value)
+  },
+}
 // Define initial system messages once
 const getInitialPrompt = (): LanguageModelV1Prompt => [
   {
     role: "system",
-    content: SYSTEM_PROMPT,
+    content: systemPrompt.get(),
     providerMetadata: {
       anthropic: {
         cacheControl: {
@@ -215,6 +222,44 @@ export function App() {
     textarea?.focus()
   }
 
+  const [showSystemPromptModal, setShowSystemPromptModal] = createSignal(false)
+  const [systemPromptValue, setSystemPromptValue] = createSignal(
+    systemPrompt.get(),
+  )
+
+  const modifySystemPrompt = () => {
+    setSystemPromptValue(systemPrompt.get())
+    setShowSystemPromptModal(true)
+  }
+
+  const handleSystemPromptSubmit = () => {
+    const newPrompt = systemPromptValue()
+    if (newPrompt.trim() !== "") {
+      systemPrompt.set(newPrompt)
+      setStore("prompt", getInitialPrompt())
+    }
+    setShowSystemPromptModal(false)
+  }
+
+  createEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (showSystemPromptModal()) {
+        if (e.key === "Escape") {
+          e.preventDefault()
+          setShowSystemPromptModal(false)
+        } else if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+          e.preventDefault()
+          handleSystemPromptSubmit()
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    onCleanup(() => {
+      window.removeEventListener("keydown", handleKeyDown)
+    })
+  })
+
   return (
     <div data-component="root" ref={root}>
       <div data-component="messages">
@@ -292,13 +337,16 @@ export function App() {
         <div data-slot="spacer"></div>
       </div>
       <div data-component="footer">
-        {store.prompt.length > 2 && !store.isProcessing && (
-          <div data-slot="clear">
-            <button data-component="clear-button" onClick={clearConversation}>
+        <div data-slot="footer-actions">
+          <button data-component="footer-action" onClick={modifySystemPrompt}>
+            🔧
+          </button>
+          {store.prompt.length > 2 && !store.isProcessing && (
+            <button data-component="footer-action" onClick={clearConversation}>
               Clear
             </button>
-          </div>
-        )}
+          )}
+        </div>
         <div data-slot="chat">
           <textarea
             autofocus
@@ -320,6 +368,47 @@ export function App() {
           />
         </div>
       </div>
+
+      <Show when={showSystemPromptModal()}>
+        <div
+          data-component="dialog-overlay"
+          onClick={() => setShowSystemPromptModal(false)}
+        ></div>
+        <div data-component="dialog-center">
+          <div data-slot="content" data-size="md">
+            <div data-slot="header">
+              <label data-size="md" data-slot="title" data-component="label">
+                🔧 System Prompt
+              </label>
+            </div>
+            <div data-slot="main">
+              <textarea
+                data-component="input"
+                style={{ "min-height": "200px", "margin-top": "10px" }}
+                value={systemPromptValue()}
+                onInput={(e) => setSystemPromptValue(e.currentTarget.value)}
+              />
+            </div>
+            <div data-slot="footer">
+              <small data-component="footer-hint">
+                Press Esc to cancel, Ctrl+Enter to save
+              </small>
+              <button
+                data-component="footer-action"
+                onClick={() => setShowSystemPromptModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                data-component="footer-action"
+                onClick={handleSystemPromptSubmit}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </Show>
     </div>
   )
 }
