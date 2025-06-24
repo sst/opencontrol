@@ -13,7 +13,7 @@ export interface OpenControlOptions {
   tools: Tool[]
   model?: LanguageModelV1
   app?: Hono
-  origin: string
+  origin?: string
 }
 
 export type App = ReturnType<typeof create>
@@ -48,15 +48,18 @@ export function create(input: OpenControlOptions) {
     return c.json(result)
   }
 
-  return app
-    .use(
-      cors({
-        origin,
-        allowHeaders: ["*"],
-        allowMethods: ["GET", "POST"],
-        credentials: true,
-      }),
-    )
+  const baseApp = origin
+    ? app.use(
+        cors({
+          origin,
+          allowHeaders: ["*"],
+          allowMethods: ["GET", "POST"],
+          credentials: true,
+        }),
+      )
+    : app
+
+  return baseApp
     .get("/", async (c) => {
       return c.html(HTML)
     })
