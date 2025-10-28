@@ -4,11 +4,7 @@ import { createMcp } from "./mcp.js"
 import { cors } from "hono/cors"
 import HTML from "opencontrol-frontend/dist/index.html" with { type: "text" }
 import { zValidator } from "@hono/zod-validator"
-import {
-  APICallError,
-  LanguageModelV1,
-  LanguageModelV1CallOptions,
-} from "ai"
+import { APICallError, LanguageModelV1, LanguageModelV1CallOptions } from "ai"
 import { z } from "zod"
 import { HTTPException } from "hono/http-exception"
 import { bearerAuth } from "hono/bearer-auth"
