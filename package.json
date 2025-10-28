@@ -47,6 +47,7 @@
     "protobufjs"
   ],
   "dependencies": {
+    "hono": "4.10.3",
     "pulumi-stripe": "0.0.24"
   }
 }

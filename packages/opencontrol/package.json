@@ -25,7 +25,7 @@
     "@modelcontextprotocol/sdk": "1.9.0",
     "@tsconfig/bun": "1.0.7",
     "ai": "4.2.11",
-    "hono": "4.7.5",
+    "hono": "4.10.3",
     "zod": "3.24.2",
     "zod-to-json-schema": "3.24.4"
   },

@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "ai": "4.2.11",
-    "hono": "4.7.5",
+    "hono": "4.10.3",
     "opencontrol": "workspace:*",
     "solid-js": "1.9.5"
   }

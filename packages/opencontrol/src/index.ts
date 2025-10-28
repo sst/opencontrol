@@ -5,7 +5,6 @@ import { cors } from "hono/cors"
 import HTML from "opencontrol-frontend/dist/index.html" with { type: "text" }
 import { zValidator } from "@hono/zod-validator"
 import {
-  AISDKError,
   APICallError,
   LanguageModelV1,
   LanguageModelV1CallOptions,
@@ -24,7 +23,7 @@ export interface OpenControlOptions {
 
 export type App = ReturnType<typeof create>
 
-export function create(input: OpenControlOptions) {
+export function create(input: OpenControlOptions): Hono {
   const mcp = createMcp({ tools: input.tools })
   const disableAuth =
     input.disableAuth || process.env.OPENCONTROL_DISABLE_AUTH === "true"
