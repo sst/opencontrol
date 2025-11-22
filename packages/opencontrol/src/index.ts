@@ -67,7 +67,10 @@ export function create(input: OpenControlOptions) {
       }
 
       // Validate systemPrompt is a non-empty string
-      if (typeof input.systemPrompt !== "string" || input.systemPrompt.trim().length === 0) {
+      if (
+        typeof input.systemPrompt !== "string" ||
+        input.systemPrompt.trim().length === 0
+      ) {
         return c.html(HTML)
       }
 
