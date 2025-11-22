@@ -1,9 +1,15 @@
 import { LanguageModelV1Prompt } from "ai"
 import { createEffect, For, onCleanup } from "solid-js"
 import { createStore } from "solid-js/store"
-import SYSTEM_PROMPT from "./system.txt?raw"
+import DEFAULT_SYSTEM_PROMPT from "./system.txt?raw"
 import { type App } from "opencontrol"
 import { client } from "./client"
+
+declare global {
+  interface Window {
+    OPENCONTROL_SYSTEM_PROMPT?: string
+  }
+}
 
 const providerMetadata = {
   anthropic: {
@@ -12,6 +18,8 @@ const providerMetadata = {
     },
   },
 }
+
+const SYSTEM_PROMPT = window.OPENCONTROL_SYSTEM_PROMPT ?? DEFAULT_SYSTEM_PROMPT
 
 // Define initial system messages once
 const getInitialPrompt = (): LanguageModelV1Prompt => {

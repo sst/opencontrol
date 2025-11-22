@@ -14,6 +14,7 @@ export interface OpenControlOptions {
   model?: LanguageModelV1
   app?: Hono
   origin?: string
+  systemPrompt?: string
 }
 
 export type App = ReturnType<typeof create>
@@ -61,7 +62,21 @@ export function create(input: OpenControlOptions) {
 
   return baseApp
     .get("/", async (c) => {
-      return c.html(HTML)
+      if (!input.systemPrompt) {
+        return c.html(HTML)
+      }
+
+      // Validate systemPrompt is a non-empty string
+      if (typeof input.systemPrompt !== "string" || input.systemPrompt.trim().length === 0) {
+        return c.html(HTML)
+      }
+
+      const scriptContent = `window.OPENCONTROL_SYSTEM_PROMPT=${JSON.stringify(input.systemPrompt)};`
+      const injectedHtml = HTML.replace(
+        "</head>",
+        `<script>${scriptContent}</script></head>`,
+      )
+      return c.html(injectedHtml)
     })
     .post(
       "/generate",
