@@ -38,9 +38,6 @@
   "prettier": {
     "semi": false
   },
-  "overrides": {
-    "zod": "3.24.2"
-  },
   "trustedDependencies": [
     "@rocicorp/zero-sqlite3",
     "esbuild",

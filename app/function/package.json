@@ -8,7 +8,7 @@
     "@ai-sdk/anthropic": "1.2.1",
     "@aws-sdk/client-cloudformation": "3.787.0",
     "@hono/zod-validator": "0.4.3",
-    "@modelcontextprotocol/sdk": "1.24.2",
+    "@modelcontextprotocol/sdk": "1.24.3",
     "@openauthjs/openauth": "0.0.0-20250322224806",
     "@opencontrol/core": "workspace:*",
     "@rocicorp/zero": "0.17.2025031904",
