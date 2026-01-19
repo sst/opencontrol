@@ -22,10 +22,10 @@
   },
   "dependencies": {
     "@hono/zod-validator": "0.4.3",
-    "@modelcontextprotocol/sdk": "1.24.3",
+    "@modelcontextprotocol/sdk": "1.25.2",
     "@tsconfig/bun": "1.0.7",
     "ai": "4.2.11",
-    "hono": "4.10.3",
+    "hono": "4.11.4",
     "zod": "4.2.1",
     "zod-to-json-schema": "3.25.0"
   },
