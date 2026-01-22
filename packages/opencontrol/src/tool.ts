@@ -1,20 +1,18 @@
-import { StandardSchemaV1 } from "@standard-schema/spec"
+import { StandardJSONSchemaV1, StandardSchemaV1 } from "@standard-schema/spec"
 import { z } from "zod"
 
-export interface Tool<
-  Args extends undefined | StandardSchemaV1 = undefined | StandardSchemaV1,
-> {
+type Schema = StandardSchemaV1 & StandardJSONSchemaV1
+
+export interface Tool<Args extends undefined | Schema = undefined | Schema> {
   name: string
   description: string
   args?: Args
-  run: Args extends StandardSchemaV1
+  run: Args extends Schema
     ? (args: StandardSchemaV1.InferOutput<Args>) => Promise<any>
     : () => Promise<any>
 }
 
-export function tool<Args extends undefined | StandardSchemaV1>(
-  input: Tool<Args>,
-) {
+export function tool<Args extends undefined | Schema>(input: Tool<Args>) {
   return input
 }
 
