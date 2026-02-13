@@ -47,23 +47,22 @@ export function create(input: OpenControlOptions): Hono {
       return c.json({})
     })
     .post("/generate", async (c) => {
-        if (!input.model)
-          throw new HTTPException(400, { message: "No model configured" })
-        const body = await c.req.json<LanguageModelV1CallOptions>()
-        try {
-          const result = await input.model.doGenerate(body)
-          return c.json(result)
-        } catch (error) {
-          console.error(error)
-          if (error instanceof APICallError) {
-            throw new HTTPException(error.statusCode || (500 as any), {
-              message: "error",
-            })
-          }
-          throw new HTTPException(500, { message: "error" })
+      if (!input.model)
+        throw new HTTPException(400, { message: "No model configured" })
+      const body = await c.req.json<LanguageModelV1CallOptions>()
+      try {
+        const result = await input.model.doGenerate(body)
+        return c.json(result)
+      } catch (error) {
+        console.error(error)
+        if (error instanceof APICallError) {
+          throw new HTTPException(error.statusCode || (500 as any), {
+            message: "error",
+          })
         }
-      },
-    )
+        throw new HTTPException(500, { message: "error" })
+      }
+    })
     .post("/mcp", async (c) => {
       const body = await c.req.json()
       const result = await mcp.process(body)
