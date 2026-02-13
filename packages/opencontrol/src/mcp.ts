@@ -10,7 +10,6 @@ import {
 } from "@modelcontextprotocol/sdk/types.js"
 import { z } from "zod"
 import { Tool } from "./tool.js"
-import { zodToJsonSchema } from "zod-to-json-schema"
 
 const RequestSchema = z.union([
   InitializeRequestSchema,
@@ -41,10 +40,11 @@ export function createMcp(input: { tools: Tool[] }) {
           return {
             tools: input.tools.map((tool) => ({
               name: tool.name,
-              inputSchema: zodToJsonSchema(
-                tool.args || (z.object({}) as any),
-                "args",
-              ).definitions!["args"] as any,
+              inputSchema: (tool.args
+                ? tool.args["~standard"].jsonSchema.input({
+                    target: "draft-2020-12",
+                  })
+                : { type: "object" }) as { type: "object" },
               description: tool.description,
             })),
           } satisfies ListToolsResult
