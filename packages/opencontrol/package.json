@@ -21,7 +21,6 @@
     }
   },
   "dependencies": {
-    "@hono/zod-validator": "0.4.3",
     "@modelcontextprotocol/sdk": "1.25.2",
     "@tsconfig/bun": "1.0.7",
     "ai": "4.2.11",

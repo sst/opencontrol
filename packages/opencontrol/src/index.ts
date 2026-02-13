@@ -3,9 +3,7 @@ import { Tool } from "./tool.js"
 import { createMcp } from "./mcp.js"
 import { cors } from "hono/cors"
 import HTML from "opencontrol-frontend/dist/index.html" with { type: "text" }
-import { zValidator } from "@hono/zod-validator"
 import { APICallError, LanguageModelV1, LanguageModelV1CallOptions } from "ai"
-import { z } from "zod"
 import { HTTPException } from "hono/http-exception"
 import { bearerAuth } from "hono/bearer-auth"
 
@@ -48,13 +46,10 @@ export function create(input: OpenControlOptions): Hono {
     .get("/auth", (c) => {
       return c.json({})
     })
-    .post(
-      "/generate",
-      zValidator("json", z.custom<LanguageModelV1CallOptions>()),
-      async (c) => {
+    .post("/generate", async (c) => {
         if (!input.model)
           throw new HTTPException(400, { message: "No model configured" })
-        const body = c.req.valid("json")
+        const body = await c.req.json<LanguageModelV1CallOptions>()
         try {
           const result = await input.model.doGenerate(body)
           return c.json(result)
